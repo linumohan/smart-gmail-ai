@@ -1,0 +1,319 @@
+/* ================= GLOBAL ================= */
+
+body{
+  margin:0;
+  background:#0b2a33;
+  color:#e5e7eb;
+  font-family:"Segoe UI", Roboto, Arial, sans-serif;
+}
+
+/* ================= HAMBURGER ================= */
+
+#menu{
+  position:fixed;
+  top:16px;
+  left:16px;
+  font-size:26px;
+  cursor:pointer;
+  z-index:1001;
+  color:white;
+}
+
+/* ================= SIDEBAR ================= */
+
+#sidebar{
+  position:fixed;
+  top:0;
+  left:-230px;
+  width:210px;
+  height:100%;
+  background:#041e26;
+  padding-top:70px;
+  transition:0.3s ease;
+  z-index:1000;
+  box-shadow:2px 0 10px rgba(0,0,0,0.4);
+}
+
+#sidebar.show{ left:0; }
+
+#sidebar a{
+  display:block;
+  padding:14px 18px;
+  color:#e5e7eb;
+  text-decoration:none;
+  font-size:15px;
+}
+
+#sidebar a:hover{
+  background:#0ea5e9;
+  color:white;
+}
+
+/* ================= MAIN ================= */
+
+.main{
+  padding:70px 35px 30px;
+  max-width:1100px;
+  margin:auto;
+}
+
+/* ================= ADD FOLDER ================= */
+
+.add-form{
+  margin-bottom:25px;
+}
+
+.add-form input{
+  padding:10px;
+  border-radius:8px;
+  border:none;
+  outline:none;
+}
+
+.add-form button{
+  padding:10px 14px;
+  border:none;
+  border-radius:8px;
+  background:#0ea5e9;
+  color:white;
+  cursor:pointer;
+}
+
+/* ================= GRID ================= */
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:22px;
+}
+
+/* ================= FOLDER CARD ================= */
+
+.card{
+  background:linear-gradient(135deg,#0ea5e9,#0284c7);
+  padding:35px;
+  border-radius:22px;
+  text-align:center;
+  text-decoration:none;
+  color:white;
+  font-size:19px;
+  position:relative;
+  transition:0.25s;
+}
+
+.card:hover{ transform:translateY(-4px); }
+
+.card span{
+  position:absolute;
+  top:12px;
+  right:14px;
+  background:#ef4444;
+  border-radius:50%;
+  padding:4px 9px;
+  font-size:12px;
+}
+
+/* ================= EMAIL LIST ================= */
+
+.email-card{
+  background:white;
+  color:#0f172a;
+  padding:16px 18px;
+  margin:14px 0;
+  border-radius:14px;
+  transition:0.2s;
+}
+
+.email-card:hover{
+  box-shadow:0 8px 25px rgba(0,0,0,0.25);
+}
+
+.email-header{
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+
+/* avatar */
+
+.avatar{
+  width:44px;
+  height:44px;
+  border-radius:50%;
+  background:#0ea5e9;
+  color:white;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:bold;
+  font-size:18px;
+}
+
+/* meta */
+
+.meta{ flex:1; }
+
+.meta .from{
+  font-size:14px;
+  color:#0f172a;
+}
+
+.subject{
+  font-weight:600;
+  margin-top:4px;
+  color:#020617;
+}
+
+/* EMAIL DATE (FIXED) */
+.email-date{
+  font-size:11px;
+  color:#64748b;
+  white-space:nowrap;
+}
+
+/* ================= MAIL VIEW ================= */
+
+.mail-body{
+  white-space:pre-wrap;
+  line-height:1.7;
+  font-size:15px;
+  color:#e5e7eb;
+}
+
+.html-mail{
+  background:white;
+  color:#020617;
+  padding:24px;
+  border-radius:14px;
+  overflow-x:auto;
+  line-height:1.7;
+  box-shadow:0 6px 18px rgba(0,0,0,0.25);
+}
+
+/* ================= ACTION BUTTONS ================= */
+
+.mail-actions{
+  margin-top:15px;
+  display:flex;
+  gap:10px;
+}
+
+button{
+  padding:9px 18px;
+  border:none;
+  border-radius:20px;
+  background:#0ea5e9;
+  color:white;
+  cursor:pointer;
+  font-size:14px;
+}
+
+button:hover{ background:#0284c7; }
+
+/* ================= SUMMARY BOX ================= */
+
+#summaryBox{
+  background:#041e26;
+  border:1px solid #0ea5e9;
+  padding:18px;
+  border-radius:14px;
+  margin-top:18px;
+}
+
+/* ================= BACK BUTTON ================= */
+
+.back-btn{
+  display:inline-block;
+  margin-bottom:18px;
+  color:#38bdf8;
+  text-decoration:none;
+  font-size:14px;
+}
+
+/* ================= REMINDER CLOCK ================= */
+
+.reminder-icon{
+  position:fixed;
+  top:18px;
+  right:20px;
+  font-size:26px;
+  cursor:pointer;
+  z-index:1002;
+}
+
+.reminder-badge{
+  position:absolute;
+  top:-6px;
+  right:-8px;
+  background:red;
+  color:white;
+  border-radius:50%;
+  padding:2px 7px;
+  font-size:12px;
+}
+
+/* ================= CALENDAR ================= */
+
+.calendar-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:15px;
+}
+
+.calendar-header button{
+  background:#0ea5e9;
+  border-radius:50%;
+  width:36px;
+  height:36px;
+  padding:0;
+  font-size:18px;
+}
+
+.calendar-title{
+  font-size:20px;
+  font-weight:bold;
+}
+
+.calendar{
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  gap:12px;
+}
+
+.day{
+  background:#0f766e;
+  padding:10px;
+  border-radius:12px;
+  min-height:90px;
+  color:white;
+  position:relative;
+}
+
+/* CALENDAR DATE (FIXED) */
+.cal-date{
+  font-weight:bold;
+  margin-bottom:6px;
+  font-size:14px;
+}
+
+/* REMINDER ITEM */
+
+.reminder-item{
+  background:#fde047;
+  color:black;
+  padding:4px 6px;
+  border-radius:6px;
+  font-size:12px;
+  margin-top:4px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+/* ================= MOBILE ================= */
+
+@media(max-width:600px){
+  .main{ padding:75px 15px; }
+  .mail-actions{ flex-direction:column; }
+}

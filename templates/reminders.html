@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Reminders</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<a href="/" class="back-btn">⬅ Back</a>
+
+<!-- ===== CALENDAR HEADER ===== -->
+<div class="calendar-header">
+  <button onclick="location.href='/reminders?year={{ prev_year }}&month={{ prev_month }}'">
+    &lt;
+  </button>
+
+  <div class="calendar-title">
+    {{ month }}/{{ year }}
+  </div>
+
+  <button onclick="location.href='/reminders?year={{ next_year }}&month={{ next_month }}'">
+    &gt;
+  </button>
+</div>
+
+<!-- ===== CALENDAR GRID ===== -->
+<div class="calendar">
+
+  {% for day in range(1, days + 1) %}
+    <div class="day">
+      <div class="cal-date">{{ day }}</div>
+
+      {% for r in reminders %}
+        {% if r.date == "%04d-%02d-%02d"|format(year, month, day) %}
+          <div class="reminder-item">
+            {{ r.subject }}
+            <button
+              onclick="deleteReminder('{{ r.id }}')"
+              style="background:none;border:none;color:red;cursor:pointer;">
+              ✖
+            </button>
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  {% endfor %}
+
+</div>
+
+<script>
+function deleteReminder(id){
+  if(!confirm("Delete this reminder?")) return;
+
+  fetch("/delete_reminder",{
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify({ id })
+  })
+  .then(() => location.reload());
+}
+</script>
+
+</body>
+</html>

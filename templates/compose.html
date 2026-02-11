@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="/static/style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<body>
+
+<!-- HAMBURGER -->
+<div id="menu">☰</div>
+
+<!-- SIDEBAR -->
+<div id="sidebar">
+  <a href="/" onclick="closeSide()">📂 Classification</a>
+  <a href="/compose" onclick="closeSide()">✍ Smart Compose</a>
+</div>
+
+<div class="main">
+
+<h2>Smart Compose</h2>
+
+<input id="to" placeholder="Receiver Email">
+
+<input id="subject" placeholder="Subject">
+
+<textarea id="composeBox" placeholder="Write your email..."></textarea>
+
+<div id="tone" style="margin-top:10px;"></div>
+
+<button onclick="rewrite()">Rewrite (Professional)</button>
+
+<pre id="result" style="white-space:pre-wrap;"></pre>
+
+<div id="newtone"></div>
+
+<button onclick="sendMail()">Send Mail</button>
+
+</div>
+
+<script>
+/* ================= SIDEBAR ================= */
+const menu = document.getElementById("menu")
+const sidebar = document.getElementById("sidebar")
+
+menu.onclick = () => sidebar.classList.toggle("show")
+function closeSide(){ sidebar.classList.remove("show") }
+
+/* ================= AUTOFILL FROM REPLY ================= */
+window.onload = function(){
+
+  const r_to = localStorage.getItem("reply_to")
+  const r_subject = localStorage.getItem("reply_subject")
+  const r_body = localStorage.getItem("reply_body")
+
+  if(r_to) document.getElementById("to").value = r_to
+  if(r_subject) document.getElementById("subject").value = r_subject
+  if(r_body) document.getElementById("composeBox").value = r_body
+}
+
+/* ================= REWRITE ================= */
+function rewrite(){
+
+  const text = composeBox.value.trim()
+  if(!text){
+    alert("Please write an email first")
+    return
+  }
+
+  tone.innerText = "✨ Analyzing tone..."
+  result.innerText = ""
+
+  fetch("/analyze",{
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify({ text: text })
+  })
+  .then(r=>r.json())
+  .then(d=>{
+    tone.innerText = "Original Tone: " + d.tone
+    newtone.innerText = "New Tone: " + d.newtone
+    result.innerText = d.rewritten
+
+    // Replace textarea with rewritten content
+    composeBox.value = d.rewritten
+  })
+  .catch(()=>{
+    tone.innerText = "❌ AI rewrite failed"
+  })
+}
+
+/* ================= SEND ================= */
+function sendMail(){
+
+  const toVal = to.value.trim()
+  const bodyVal = composeBox.value.trim()
+
+  if(!toVal || !bodyVal){
+    alert("To and Message are required")
+    return
+  }
+
+  fetch("/send_mail",{
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify({
+      to: toVal,
+      subject: subject.value,
+      body: bodyVal
+    })
+  })
+  .then(r=>r.json())
+  .then(()=>{
+    alert("✅ Mail Sent Successfully!")
+    localStorage.clear()
+    window.location = "/"
+  })
+  .catch(()=>{
+    alert("❌ Failed to send mail")
+  })
+}
+</script>
+
+</body>
+</html>

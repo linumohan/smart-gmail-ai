@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AI Email Assistant</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<!-- ================= HAMBURGER ================= -->
+<div id="menu">☰</div>
+
+<!-- ================= SIDEBAR ================= -->
+<nav id="sidebar">
+  <a href="/" onclick="closeSide()">📂 Classification</a>
+  <a href="/compose" onclick="closeSide()">✍ Smart Compose</a>
+  <a href="/refresh" onclick="closeSide()">🔄 Refresh Emails</a>
+</nav>
+
+<!-- ================= MAIN ================= -->
+<main class="main">
+
+  <!-- ================= HEADER ================= -->
+  <header class="page-header" style="position:relative;">
+
+    <h1>📬 Smart Email Categories</h1>
+    <p class="subtitle">AI-powered email organization & reminders</p>
+
+    <!-- 🔔 REMINDER ICON (TOP RIGHT) -->
+    <div
+      class="reminder-icon"
+      title="View reminders"
+      onclick="location.href='/reminders'"
+      style="
+        position:absolute;
+        top:10px;
+        right:10px;
+        font-size:24px;
+        cursor:pointer;
+      "
+    >
+      ⏰
+      {% if reminders is defined and reminders|length > 0 %}
+        <span
+          class="reminder-badge"
+          style="
+            position:absolute;
+            top:-6px;
+            right:-10px;
+            background:#ef4444;
+            color:white;
+            font-size:12px;
+            padding:2px 6px;
+            border-radius:50%;
+          "
+        >
+          {{ reminders|length }}
+        </span>
+      {% endif %}
+    </div>
+
+  </header>
+
+  <!-- ================= ADD FOLDER ================= -->
+  <section class="add-folder-section">
+    <form method="POST" action="/add_folder" class="add-form">
+      <input
+        name="name"
+        placeholder="Create new folder…"
+        required
+      >
+      <button type="submit">＋ Add Folder</button>
+    </form>
+  </section>
+
+  <!-- ================= CATEGORY GRID ================= -->
+  <section class="grid">
+    {% for name, emails in folders.items() %}
+      <a class="card" href="/folder/{{ name }}">
+        <div class="card-title">{{ name }}</div>
+        <span class="card-count">{{ emails|length }}</span>
+      </a>
+    {% endfor %}
+  </section>
+
+</main>
+
+<!-- ================= SCRIPT ================= -->
+<script>
+const menu = document.getElementById("menu");
+const sidebar = document.getElementById("sidebar");
+
+menu.onclick = () => sidebar.classList.toggle("show");
+
+function closeSide(){
+  sidebar.classList.remove("show");
+}
+
+document.addEventListener("click", (e) => {
+  if (!sidebar.contains(e.target) && !menu.contains(e.target)) {
+    sidebar.classList.remove("show");
+  }
+});
+</script>
+
+</body>
+</html>

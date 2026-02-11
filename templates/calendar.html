@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Reminder Calendar</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<div class="main">
+
+  <a href="/" style="text-decoration:none;">⬅ Back</a>
+
+  <!-- HEADER -->
+  <div style="display:flex;align-items:center;justify-content:space-between;margin:15px 0;">
+    <button onclick="changeMonth(-1)">◀</button>
+    <h2 id="monthTitle"></h2>
+    <button onclick="changeMonth(1)">▶</button>
+  </div>
+
+  <!-- CALENDAR GRID -->
+  <div class="calendar-grid" id="calendar"></div>
+
+</div>
+
+<!-- SAFELY PASS REMINDERS -->
+<script type="application/json" id="reminderData">
+  {{ reminders | tojson }}
+</script>
+
+<script>
+/* ================= DATA ================= */
+const REMINDERS = JSON.parse(
+  document.getElementById("reminderData").textContent
+);
+
+/* ================= DATE STATE ================= */
+let today = new Date();
+let currentMonth = today.getMonth();   // 0-11
+let currentYear  = today.getFullYear();
+
+/* ================= RENDER CALENDAR ================= */
+function renderCalendar(){
+  const calendar = document.getElementById("calendar");
+  const title = document.getElementById("monthTitle");
+
+  const monthNames = [
+    "January","February","March","April","May","June",
+    "July","August","September","October","November","December"
+  ];
+
+  title.innerText = `${monthNames[currentMonth]} ${currentYear}`;
+  calendar.innerHTML = "";
+
+  const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+  // Empty cells before month start
+  for(let i = 0; i < firstDay; i++){
+    calendar.innerHTML += `<div class="calendar-cell empty"></div>`;
+  }
+
+  for(let day = 1; day <= daysInMonth; day++){
+    const dateStr =
+      currentYear + "-" +
+      String(currentMonth + 1).padStart(2,"0") + "-" +
+      String(day).padStart(2,"0");
+
+    const reminder = REMINDERS.find(r => r.date === dateStr);
+
+    calendar.innerHTML += `
+      <div class="calendar-cell ${reminder ? 'has-reminder' : ''}">
+        <strong>${day}</strong>
+        ${reminder ? `<div class="rem-text">${reminder.subject}</div>` : ""}
+      </div>
+    `;
+  }
+}
+
+/* ================= MONTH NAVIGATION ================= */
+function changeMonth(step){
+  currentMonth += step;
+
+  if(currentMonth < 0){
+    currentMonth = 11;
+    currentYear--;
+  }
+
+  if(currentMonth > 11){
+    currentMonth = 0;
+    currentYear++;
+  }
+
+  renderCalendar();
+}
+
+/* ================= INIT ================= */
+renderCalendar();
+</script>
+
+</body>
+</html>

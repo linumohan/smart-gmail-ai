@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<body>
+
+<!-- HAMBURGER -->
+<div id="menu">☰</div>
+
+<!-- SIDEBAR -->
+<div id="sidebar">
+  <a href="/" onclick="closeSide()">📂 Classification</a>
+  <a href="/compose" onclick="closeSide()">✍ Smart Compose</a>
+</div>
+
+<div class="main">
+
+<a href="/" class="back-btn">⬅ Back</a>
+
+<h1>{{ name }}</h1>
+
+{% for e in emails %}
+
+  {% if e.id %}
+
+  <!-- EMAIL CARD (CLICK → NEW PAGE) -->
+  <a href="/mail/{{ e.id }}" class="email-card-link">
+
+    <div class="email-card">
+      <div class="email-header">
+
+        <div class="avatar">
+          {{ e.from[0]|upper if e.from else "?" }}
+        </div>
+
+        <div class="meta">
+          <div class="from"><b>{{ e.from }}</b></div>
+          <div class="subject">{{ e.subject }}</div>
+        </div>
+
+        <div class="date">
+          {{ e.date }}
+        </div>
+
+      </div>
+    </div>
+
+  </a>
+
+  {% else %}
+    <!-- Safety fallback (should not happen after cache fix) -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="meta">
+          <div class="subject">
+            ⚠ Mail ID missing (refresh inbox)
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+
+{% endfor %}
+
+</div>
+
+<script>
+const menu = document.getElementById("menu")
+const sidebar = document.getElementById("sidebar")
+
+menu.onclick = () => sidebar.classList.toggle("show")
+
+function closeSide(){
+  sidebar.classList.remove("show")
+}
+
+document.addEventListener("click",(e)=>{
+  if(!sidebar.contains(e.target) && !menu.contains(e.target)){
+    sidebar.classList.remove("show")
+  }
+})
+</script>
+
+</body>
+</html>

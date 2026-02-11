@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>View Mail</title>
+</head>
+
+<body>
+
+<div id="menu">☰</div>
+
+<div id="sidebar">
+  <a href="/" onclick="closeSide()">📂 Classification</a>
+  <a href="/compose" onclick="closeSide()">✍ Smart Compose</a>
+</div>
+
+<div class="main">
+
+<a href="javascript:history.back()" class="back-btn">⬅ Back</a>
+
+{% if mail %}
+
+<div id="mailData"
+     data-from="{{ mail.from }}"
+     data-subject="{{ mail.subject }}">
+</div>
+
+<h2>{{ mail.subject }}</h2>
+<p><b>From:</b> {{ mail.from }}</p>
+<p><b>Date:</b> {{ mail.date }}</p>
+
+<hr>
+
+<div class="mail-body" id="mailContent">
+  {% if mail.html %}
+    <div class="html-mail">{{ mail.html | safe }}</div>
+  {% else %}
+    {{ mail.plain }}
+  {% endif %}
+</div>
+
+<hr>
+
+<div class="mail-actions" style="display:flex;gap:10px;align-items:center;">
+  <button onclick="replyMail()">Reply</button>
+  <button onclick="summarizeMail()">Summarize</button>
+
+  <!-- ✅ DATE PICKER -->
+  <input type="date" id="reminderDate">
+
+  <button onclick="setReminder()">⏰ Set Reminder</button>
+</div>
+
+<div id="summaryBox" style="display:none;margin-top:15px;"></div>
+
+{% endif %}
+
+</div>
+
+<script>
+const data = document.getElementById("mailData");
+const MAIL_FROM = data.dataset.from;
+const MAIL_SUBJECT = data.dataset.subject;
+
+function setReminder(){
+  const date = document.getElementById("reminderDate").value;
+
+  if(!date){
+    alert("📅 Please select a date first");
+    return;
+  }
+
+  fetch("/add_reminder",{
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify({
+      subject: MAIL_SUBJECT,
+      from: MAIL_FROM,
+      date: date
+    })
+  })
+  .then(r => r.json())
+  .then(d => {
+    if(d.status === "ok"){
+      alert("✅ Reminder added!");
+    }else if(d.status === "exists"){
+      alert("⚠️ Reminder already exists");
+    }else{
+      alert("❌ Failed to add reminder");
+    }
+  });
+}
+</script>
+
+</body>
+</html>
