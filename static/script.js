@@ -1,65 +1,84 @@
 // ================= INBOX ANALYSIS =================
 
-function analyzeEmail(text){
+function analyzeEmail() {
 
-    const summary = document.getElementById("summary");
-    summary.style.display = "block";
-    summary.innerHTML = "✨ AI analyzing email...";
+    const summaryBox = document.getElementById("summary");
 
-    fetch("/analyze",{
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({ text: text })
+    // Get visible mail content
+    const mailElement = document.querySelector(".email-body");
+
+    if (!mailElement) {
+        alert("No mail content found");
+        return;
+    }
+
+    const mailText = mailElement.innerText;
+    const mailHtml = mailElement.innerHTML;
+
+    summaryBox.style.display = "block";
+    summaryBox.innerHTML = "✨ AI analyzing email...";
+
+    fetch("/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            text: mailText,
+            html: mailHtml
+        })
     })
-    .then(r=>r.json())
-    .then(data=>{
+    .then(r => r.json())
+    .then(data => {
 
-        summary.innerHTML = `
+        summaryBox.innerHTML = `
+            <p><strong>Summary:</strong></p>
+            <p>${data.summary}</p>
+
+            <hr>
+
             <p><strong>Tone:</strong> ${data.tone}</p>
-            <p><strong>Professional Version:</strong></p>
-            <textarea style="width:100%;height:120px;">${data.rewritten}</textarea>
         `;
     })
-    .catch(()=>{
-        summary.innerHTML="❌ Failed to analyze email.";
+    .catch(() => {
+        summaryBox.innerHTML = "❌ Failed to analyze email.";
     });
 }
 
 
 // ================= COMPOSER =================
 
-function analyzeCompose(){
+function analyzeCompose() {
 
     const email = document.getElementById("composeBox").value;
     const res = document.getElementById("composeResult");
 
-    if(!email.trim()){
+    if (!email.trim()) {
         alert("ദയവായി ആദ്യം email എഴുതൂ");
         return;
     }
 
-    res.style.display="block";
-    res.innerHTML="✨ AI thinking...";
+    res.style.display = "block";
+    res.innerHTML = "✨ AI thinking...";
 
-    fetch("/analyze",{
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({ text: email })
+    fetch("/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            text: email
+        })
     })
-    .then(r=>r.json())
-    .then(d=>{
+    .then(r => r.json())
+    .then(d => {
 
-        res.innerHTML=`
-        <p><strong>Original Tone:</strong> ${d.tone}</p>
+        res.innerHTML = `
+            <p><strong>Summary:</strong></p>
+            <p>${d.summary}</p>
 
-        <p><strong>Tone After Rewrite:</strong> ${d.newtone}</p>
+            <hr>
 
-        <p><strong>Professional Email:</strong></p>
-
-        <textarea style="width:100%;height:130px;">${d.rewritten}</textarea>
+            <p><strong>Tone:</strong> ${d.tone}</p>
         `;
     })
-    .catch(()=>{
-        res.innerHTML="❌ AI error. Try again.";
+    .catch(() => {
+        res.innerHTML = "❌ AI error. Try again.";
     });
 }

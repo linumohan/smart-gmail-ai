@@ -9,6 +9,7 @@ from flask import Flask, render_template, request, redirect, jsonify
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
+from bs4 import BeautifulSoup   # ✅ moved here
 
 app = Flask(__name__)
 
@@ -52,53 +53,6 @@ def load_categories():
         CATEGORY_FILE,
         ["Academics", "Job", "Travel", "Shopping", "Personal"]
     )
-
-# ================= REMINDERS =================
-
-def load_reminders():
-    return safe_json_load(REMINDER_FILE, [])
-
-def save_reminders(reminders):
-    safe_json_save(REMINDER_FILE, reminders)
-
-@app.route("/add_reminder", methods=["POST"])
-def add_reminder():
-    data = request.json or {}
-
-    subject = data.get("subject", "").strip()
-    sender  = data.get("from", "").strip()
-    date    = data.get("date")  # YYYY-MM-DD
-
-    if not subject or not date:
-        return jsonify({"status": "invalid"})
-
-    reminders = load_reminders()
-
-    # prevent duplicate
-    for r in reminders:
-        if r["subject"] == subject and r["from"] == sender and r["date"] == date:
-            return jsonify({"status": "exists"})
-
-    reminders.append({
-        "id": str(int(datetime.now().timestamp() * 1000)),  # unique ID
-        "subject": subject,
-        "from": sender,
-        "date": date
-    })
-
-    save_reminders(reminders)
-    return jsonify({"status": "ok"})
-
-@app.route("/delete_reminder", methods=["POST"])
-def delete_reminder():
-    data = request.json or {}
-    reminder_id = data.get("id")
-
-    reminders = load_reminders()
-    reminders = [r for r in reminders if r.get("id") != reminder_id]
-
-    save_reminders(reminders)
-    return jsonify({"status": "deleted"})
 
 # ================= GMAIL AUTH =================
 
@@ -217,15 +171,14 @@ def fetch_emails(force=False):
 def index():
     fetch_emails()
 
-    mails     = safe_json_load(EMAIL_CACHE, [])
-    labels    = load_categories() + ["Others"]
-    reminders = load_reminders()
+    mails  = safe_json_load(EMAIL_CACHE, [])
+    labels = load_categories() + ["Others"]
 
     folders = {l: [] for l in labels}
     for m in mails:
         folders[m["category"]].append(m)
 
-    return render_template("index.html", folders=folders, reminders=reminders)
+    return render_template("index.html", folders=folders)
 
 @app.route("/refresh")
 def refresh():
@@ -250,49 +203,81 @@ def view_mail(mail_id):
 def compose():
     return render_template("compose.html")
 
-# ================= CALENDAR (FULL MONTH SUPPORT) =================
+# ================= SUMMARIZATION + TONE =================
 
-@app.route("/reminders")
-def reminders_page():
-    reminders = load_reminders()
+@app.route("/analyze", methods=["POST"])
+def analyze():
 
-    # Get month/year from query params
-    year = request.args.get("year", type=int)
-    month = request.args.get("month", type=int)
+    data = request.json or {}
+    text = data.get("text", "")
+    html_content = data.get("html", "")
 
-    today = datetime.now()
+    if not text and html_content:
+        soup = BeautifulSoup(html_content, "html.parser")
+        text = soup.get_text(" ")
 
-    if not year or not month:
-        year = today.year
-        month = today.month
+    text = text.strip()
 
-    # Month wrap logic
-    prev_month = month - 1
-    prev_year = year
-    if prev_month < 1:
-        prev_month = 12
-        prev_year -= 1
+    if not text:
+        return jsonify({
+            "summary": "No content available for summarization.",
+            "tone": "Unknown"
+        })
 
-    next_month = month + 1
-    next_year = year
-    if next_month > 12:
-        next_month = 1
-        next_year += 1
+    sentences = text.replace("\n", " ").split(". ")
+    summary = ". ".join(sentences[:2]).strip()
 
-    days_in_month = monthrange(year, month)[1]
+    if not summary.endswith("."):
+        summary += "."
 
-    return render_template(
-        "reminders.html",
-        reminders=reminders,
-        year=year,
-        month=month,
-        days=days_in_month,
-        prev_month=prev_month,
-        prev_year=prev_year,
-        next_month=next_month,
-        next_year=next_year
-    )
+    tone = "Negative" if any(
+        word in text.lower()
+        for word in ["hate", "angry", "bad", "issue", "complaint"]
+    ) else "Neutral"
 
+    return jsonify({
+        "summary": summary,
+        "tone": tone
+    })
+
+# ================= SEND =================
+
+@app.route("/send_mail", methods=["POST"])
+def send():
+    d = request.json
+
+    if not d.get("to") or not d.get("body"):
+        return jsonify({"status": "error", "msg": "Missing fields"})
+
+    msg = MIMEText(d["body"], "html")
+    msg["to"] = d["to"]
+    msg["subject"] = d.get("subject", "Mail")
+
+    raw = base64.urlsafe_b64encode(msg.as_bytes()).decode()
+
+    gmail().users().messages().send(
+        userId="me",
+        body={"raw": raw}
+    ).execute()
+
+    return jsonify({"status": "sent"})
+
+# ================= ADD FOLDER =================
+
+@app.route("/add_folder", methods=["POST"])
+def add_folder():
+    name = request.form.get("name", "").strip()
+
+    if not name:
+        return redirect("/")
+
+    categories = load_categories()
+
+    if name not in categories:
+        categories.append(name)
+        safe_json_save(CATEGORY_FILE, categories)
+
+    return redirect("/")
 
 # ================= RUN =================
 
