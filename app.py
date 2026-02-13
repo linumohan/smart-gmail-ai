@@ -203,16 +203,20 @@ def view_mail(mail_id):
 def compose():
     return render_template("compose.html")
 
-# ================= SUMMARIZATION + TONE =================
+
+# ================= SUMMARY =================
 
 @app.route("/analyze", methods=["POST"])
 def analyze():
 
     data = request.json or {}
+
     text = data.get("text", "")
     html_content = data.get("html", "")
 
+    # If only HTML content exists (structured emails)
     if not text and html_content:
+        from bs4 import BeautifulSoup
         soup = BeautifulSoup(html_content, "html.parser")
         text = soup.get_text(" ")
 
@@ -220,25 +224,21 @@ def analyze():
 
     if not text:
         return jsonify({
-            "summary": "No content available for summarization.",
-            "tone": "Unknown"
+            "summary": "No content available for summarization."
         })
 
+    # Simple summary logic
     sentences = text.replace("\n", " ").split(". ")
+
     summary = ". ".join(sentences[:2]).strip()
 
     if not summary.endswith("."):
         summary += "."
 
-    tone = "Negative" if any(
-        word in text.lower()
-        for word in ["hate", "angry", "bad", "issue", "complaint"]
-    ) else "Neutral"
-
     return jsonify({
-        "summary": summary,
-        "tone": tone
+        "summary": summary
     })
+
 
 # ================= SEND =================
 

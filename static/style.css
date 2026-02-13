@@ -212,12 +212,30 @@ button:hover{ background:#0284c7; }
 
 /* ================= SUMMARY BOX ================= */
 
+/* ================= SUMMARY BOX ================= */
+
 #summaryBox{
-  background:#041e26;
+  background:#f1f5f9;          /* Light background */
   border:1px solid #0ea5e9;
-  padding:18px;
+  padding:20px;
   border-radius:14px;
   margin-top:18px;
+  color:#0f172a;               /* Dark readable text */
+  font-size:15px;
+  line-height:1.6;
+}
+
+/* Make summary headings darker */
+
+#summaryBox strong{
+  color:#0284c7;
+}
+
+/* If summary contains paragraph */
+
+#summaryBox p{
+  margin:8px 0;
+  color:#0f172a;
 }
 
 /* ================= BACK BUTTON ================= */
